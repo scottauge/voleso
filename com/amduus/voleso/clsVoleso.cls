@@ -20,7 +20,7 @@
 /*            '-'-------------------------------------------'             */
 /*                                                                        */
 /*                                                                        */
-/* Copyright 2012,2020 Amduus Information Works, Inc., Scott Auge         */
+/* Copyright 2012,2020,2021 Amduus Information Works, Inc., Scott Auge         */
 /* All rights reserved.                                                   */
 /*                                                                        */
 /* Redistribution and use in source and binary forms, with or without     */
