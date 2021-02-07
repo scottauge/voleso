@@ -225,7 +225,8 @@ class com.amduus.voleso.clsVoleso:
 
   end. // 
 
-
+  // How to render to webspeed
+  // AnObject:HTMLRender(stream webstream:handle)
 
   method public logical HTMLRender(input Destination as handle):
     
@@ -246,7 +247,7 @@ class com.amduus.voleso.clsVoleso:
     
     if SizeOf < ChunkSize then do:
       put stream-handle Destination unformatted string(HTMLTemplate).
-      return.
+      return true.
     end. /* if SizeOf ... */
     
     /* Otherwise we need to chunk up the longchar into char via ChunkSize and put */

@@ -79,39 +79,39 @@
 /* an editor.                                                             */
 /**************************************************************************/
 
-CLASS com.amduus.voleso.clsRawSectionYanker:
+class com.amduus.voleso.clsRawSectionYanker:
 
-  DEFINE PRIVATE VARIABLE Template AS LONGCHAR NO-UNDO.
+  define private variable Template as longchar no-undo.
 
   /**********************************************************************/
   /* Initialize the template by reading it in from a file.              */
   /**********************************************************************/
   
-  CONSTRUCTOR clsRawSectionYanker (INPUT TemplateFile AS CHARACTER):
+  constructor clsRawSectionYanker (input TemplateFile as character):
 
-    COPY-LOB FROM FILE TemplateFile TO Template.
+    copy-lob from file TemplateFile to Template.
 
-  END. /* Constructor */
+  end. /* Constructor */
 
   /**********************************************************************/
   /* Initialize the template by giving it a new value.                  */
   /**********************************************************************/
 
-  CONSTRUCTOR clsRawSectionYanker (INPUT NewTemplate AS LONGCHAR):
+  constructor clsRawSectionYanker (input NewTemplate as longchar):
 
     Template = NewTemplate.
 
-  END. /* Constructor */
+  end. /* Constructor */
 
   /**********************************************************************/
   /* Write out what we got.  Used as a debugging tool mostly.           */
   /**********************************************************************/
   
-  METHOD PUBLIC VOID  WriteTemplate (INPUT TemplateFile AS CHARACTER):
+  method public void  WriteTemplate (input TemplateFile as character):
 
-    COPY-LOB FROM Template TO FILE TemplateFile.
+    copy-lob from Template to file TemplateFile.
 
-  END. /* WriteTemplate */
+  end. /* WriteTemplate */
   
   /**********************************************************************/
   /* Generally used for debugging.                                      */
@@ -120,7 +120,7 @@ CLASS com.amduus.voleso.clsRawSectionYanker:
   method public void WriteLongToFile (input TemplateFile as character, 
                                       input LongText as longchar):
                                 
-    COPY-LOB FROM LongText TO FILE TemplateFile.
+    copy-lob from LongText to file TemplateFile.
     
   end. /* WriteLong */
 
@@ -129,48 +129,48 @@ CLASS com.amduus.voleso.clsRawSectionYanker:
   /* Note this retains the section tags in the data.                    */
   /**********************************************************************/
    
-  METHOD PUBLIC LONGCHAR YankSection (INPUT SectionName AS CHARACTER):
+  method public longchar YankSection (input SectionName as character):
 
-    DEFINE VARIABLE TheSection AS LONGCHAR NO-UNDO.
-    DEFINE VARIABLE SectionStartOffset AS INTEGER NO-UNDO.
-    DEFINE VARIABLE SectionEndOffset AS INTEGER NO-UNDO.
+    define variable TheSection as longchar no-undo.
+    define variable SectionStartOffset as integer no-undo.
+    define variable SectionEndOffset as integer no-undo.
 
-    DEFINE VARIABLE WorkingText AS LONGCHAR NO-UNDO.
+    define variable WorkingText as longchar no-undo.
 
-    DEFINE VARIABLE NextSectionStartOffset AS INTEGER NO-UNDO.
-    DEFINE VARIABLE PossibleSectionEndoffset AS INTEGER NO-UNDO.
+    define variable NextSectionStartOffset as integer no-undo.
+    define variable PossibleSectionEndoffset as integer no-undo.
 
-    DEFINE VARIABLE WalkingOffset AS INTEGER NO-UNDO.
-    DEFINE VARIABLE LastWalkingOffset AS INTEGER NO-UNDO.
-    DEFINE VARIABLE NeededClosingTags AS INTEGER NO-UNDO.
+    define variable WalkingOffset as integer no-undo.
+    define variable LastWalkingOffset as integer no-undo.
+    define variable NeededClosingTags as integer no-undo.
 
     /* The easy part, find the beginning of the section */
 
-    SectionStartOffset = INDEX (Template, "~{section name=" + SectionName).
+    SectionStartOffset = index (Template, "~{section name=" + SectionName).
     
     /* If no such offset, then return blank line. */
 
-    IF SectionStartOffset = 0 THEN RETURN "".
+    if SectionStartOffset = 0 then return "".
 
     /* Work only with text in question, that is, get rid of the beginning */
     /* text we might have enountered before the section since it is use-  */
     /* less to us. */
 
-    WorkingText = SUBSTRING (Template, SectionStartOffset).
+    WorkingText = substring (Template, SectionStartOffset).
 
     /* Find the first closing section tag */
 
-    PossibleSectionEndOffset = INDEX (WorkingText, "~{/section~}").
+    PossibleSectionEndOffset = index (WorkingText, "~{/section~}").
 
     /* Determine if there is a sub-section between our section and the closing */
     /* section tag.  If not, we have our section.  This is worth computing be- */
     /* cause often we will be working with sections with no sub-sections.      */
 
-    NextSectionStartOffset = INDEX (WorkingText, "~{section name=", 2).
+    NextSectionStartOffset = index (WorkingText, "~{section name=", 2).
 
-    IF NextSectionStartOffset > 0 THEN
-        IF NextSectionStartOffset > PossibleSectionEndoffset THEN
-            RETURN SUBSTRING (WorkingText, 1, PossibleSectionEndOffset + LENGTH ("~{/section~}") - 1).
+    if NextSectionStartOffset > 0 then
+        if NextSectionStartOffset > PossibleSectionEndoffset then
+            return substring (WorkingText, 1, PossibleSectionEndOffset + LENGTH ("~{/section~}") - 1).
 
     /* Now the harder part, we have sub-sections that need to be included. */
 
@@ -178,7 +178,7 @@ CLASS com.amduus.voleso.clsRawSectionYanker:
     NeededClosingTags = 0.
     LastWalkingOffset = WalkingOffset.
 
-    DO WHILE TRUE:
+    do while true:
 
         /* Move our offset to find tags past our current position */
 
@@ -189,48 +189,48 @@ CLASS com.amduus.voleso.clsRawSectionYanker:
         /* the substring following this search loop. */
 
         LastWalkingOffset = WalkingOffset.
-        WalkingOffset = INDEX (WorkingText, "section", WalkingOffset).
+        WalkingOffset = index (WorkingText, "section", WalkingOffset).
 
-        IF WalkingOffset = 0 THEN LEAVE.
+        if WalkingOffset = 0 then leave.
 
         /* If we encountered a new open tag, then update our count of */
         /* needed closing tags. */
 
-        IF WalkingOffset > 1 THEN
-        IF SUBSTRING (WorkingText, WalkingOffset - 1, 1) = "~{" THEN DO:
+        if WalkingOffset > 1 then
+        if substring (WorkingText, WalkingOffset - 1, 1) = "~{" then do:
 
             NeededClosingTags = NeededClosingTags + 1.
 
-        END. /* if new subsection found */
+        end. /* if new subsection found */
 
         /* If we encountered a closing tag, the update our count of */
         /* needed closing tags. */
 
-        IF WalkingOffset > 2 THEN
-        IF SUBSTRING (WorkingText, WalkingOffset - 2, 2) = "~{/" THEN DO:
+        if WalkingOffset > 2 then
+        if substring (WorkingText, WalkingOffset - 2, 2) = "~{/" then do:
             
             NeededClosingTags = NeededClosingTags - 1.
 
-        END. /* end of a subsection or the section */
+        end. /* end of a subsection or the section */
 
         /* if we have our closing tag, we are done! */
 
-        IF NeededClosingTags = 0 THEN DO:
+        if NeededClosingTags = 0 then do:
 
-            LEAVE.
+            leave.
 
-        END. /* if NeededClosingTags = 0 */
+        end. /* if NeededClosingTags = 0 */
 
-    END. /* do while true */
+    end. /* do while true */
 
     /* We have found the boundaries, return the section */
 
     WalkingOffset = WalkingOffset + 7.
-    TheSection = SUBSTRING (WorkingText, 1, WalkingOffset).
+    TheSection = substring (WorkingText, 1, WalkingOffset).
     
-    RETURN TheSection.
+    return TheSection.
 
-  END. /* YankSection */
+  end. /* YankSection */
   
   /**********************************************************************/
   /* Yank a section, but without it's outside tagging.                  */
@@ -258,7 +258,7 @@ CLASS com.amduus.voleso.clsRawSectionYanker:
   
   end. /* YankSectionNoDelimiters */
 
-END. /* clsRawSectionYanker */
+end. /* clsRawSectionYanker */
 
 /**************************************************************************/
 /* UNIT TESTING CODE                                                      */
